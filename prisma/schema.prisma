@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Rol {
+  USUARIO
+  ADMIN
+}
+
+enum EstadoHabito {
+  ACTIVO
+  PAUSADO
+  ARCHIVADO
+}
+
+enum FrecuenciaHabito {
+  DIARIA
+  SEMANAL
+  MENSUAL
+}
+
+model Usuario {
+  id           String   @id @default(uuid())
+  nombre       String
+  email        String   @unique
+  passwordHash String
+  rol          Rol      @default(USUARIO)
+  creadoEn     DateTime @default(now())
+
+  habitos Habito[]
+
+  @@map("usuarios")
+}
+
+model Habito {
+  id          String           @id @default(uuid())
+  nombre      String
+  descripcion String?
+  estado      EstadoHabito     @default(ACTIVO)
+  frecuencia  FrecuenciaHabito @default(DIARIA)
+  usuarioId   String
+  creadoEn    DateTime         @default(now())
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@map("habitos")
+}
